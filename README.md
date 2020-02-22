@@ -1,4 +1,4 @@
-# ir-tools
+# ir-utils
 ## Installation
 `pip install  git+https://github.com/steventhan/ir-utils.git`
 ## Example
