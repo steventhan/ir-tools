@@ -1,10 +1,7 @@
 import setuptools
 
-with open("README.md", "r") as fh:
-    long_description = fh.read()
-
 setuptools.setup(
-    name="",
+    name="ir-tools",
     version="0.0.1",
     install_requires=[
         "url-normalize==1.4.1",
