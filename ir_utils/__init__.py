@@ -1,1 +1,2 @@
-from .url import canonicalize 
+from .url import * 
+from .relevant_keywords import *

@@ -1,4 +1,4 @@
-from ir_utils import canonicalize
+from ir_utils import canonicalize, RELEVANT_KEYWORDS
 
 
 def test_canonicalize():
@@ -24,3 +24,7 @@ def test_canonicalize():
         == "example.com/abc"
     assert canonicalize("http://example.com/abc?q1=abc#section") \
         == "example.com/abc"
+
+
+def test_relevant_keywords():
+    assert isinstance(RELEVANT_KEYWORDS, set)
