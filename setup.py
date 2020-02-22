@@ -8,5 +8,6 @@ setuptools.setup(
     ],
     author="Steven Than",
     description="Utils for ir homework",
-    python_requires='>=3.6'
+    python_requires='>=3.6',
+    packages=["ir_utils"]
 )
