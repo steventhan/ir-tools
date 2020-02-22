@@ -5,8 +5,10 @@ from urllib.parse import urlparse, urljoin
 def canonicalize(url: str) -> str:
     normalized = url_normalize(url)
     parsed = urlparse(normalized)
-    return urljoin(normalized, parsed.path) \
+    url_no_scheme = urljoin(normalized, parsed.path) \
         .replace("http://", "").replace("https://", "")
+    return url_no_scheme[4:] if url_no_scheme.startswith("www.") \
+        else url_no_scheme
 
 
 if __name__ == "__main__":

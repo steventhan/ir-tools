@@ -3,22 +3,24 @@ from ir_utils import canonicalize
 
 def test_canonicalize():
     assert canonicalize("HTtP://www.Example.com/SomeFile.html") \
-        == "www.example.com/SomeFile.html"
+        == "example.com/SomeFile.html"
     assert canonicalize("http://www.example.com:80") \
-        == "www.example.com/"
+        == "example.com/"
     assert canonicalize("https://www.example.com:443") \
-        == "www.example.com/"
+        == "example.com/"
     assert canonicalize("https://www.example.com/a/../c.html") \
-        == "www.example.com/c.html"
+        == "example.com/c.html"
     assert canonicalize("http://www.example.com//a.html") \
-        == "www.example.com/a.html"
+        == "example.com/a.html"
     assert canonicalize("http://www.example.com/a.html#anything") \
-        == "www.example.com/a.html"
+        == "example.com/a.html"
     assert canonicalize("http://www.example.com/abc/?q1=abc") \
-        == "www.example.com/abc/"
+        == "example.com/abc/"
     assert canonicalize("http://www.example.com/abc?q1=abc") \
-        == "www.example.com/abc"
+        == "example.com/abc"
     assert canonicalize("http://www.example.com/abc.html#section") \
-        == "www.example.com/abc.html"
+        == "example.com/abc.html"
     assert canonicalize("http://www.example.com/abc?q1=abc#section") \
-        == "www.example.com/abc"
+        == "example.com/abc"
+    assert canonicalize("http://example.com/abc?q1=abc#section") \
+        == "example.com/abc"
