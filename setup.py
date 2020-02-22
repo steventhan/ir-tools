@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="ir-tools",
+    name="ir-utils",
     version="0.0.1",
     install_requires=[
         "url-normalize==1.4.1",
