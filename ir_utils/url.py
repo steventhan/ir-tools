@@ -5,7 +5,8 @@ from urllib.parse import urlparse, urljoin
 def canonicalize(url: str) -> str:
     normalized = url_normalize(url)
     parsed = urlparse(normalized)
-    return urljoin(normalized, parsed.path)
+    return urljoin(normalized, parsed.path) \
+        .replace("http://", "").replace("https://", "")
 
 
 if __name__ == "__main__":
