@@ -5,6 +5,6 @@
 ```python
 from ir_utils import canonicalize
 
-print(canonicalize("https://hello.com/abc.html?q1=test"))
+print(canonicalize("https://hello.com:443/abc.html?q1=test#main")) # Prints https://hello.com/abc.html
 
 ```
