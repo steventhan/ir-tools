@@ -3,5 +3,18 @@ RELEVANT_KEYWORDS = set([
     "immigrant",
     "u.s",
     "united states",
-    "policy"
+    "policy",
+    "reform",
+    "migrants",
+    "diversity",
+    "border",
+    "refugees",
+    "visa",
+    "green card",
+    "uscis",
+    "dhs",
+    "department of homeland security",
+    "deport",
+    "asylum",
+    "foreign"
 ])
