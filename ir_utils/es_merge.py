@@ -82,7 +82,7 @@ def merge(local_endpoint: str, local_index: str,
     confirm = input("Verify info before proceed, this is a non-reversible " 
         "operation\nDoes this look correct? y/n? ")
     if confirm == "y":
-        print("Merging indexes:")
+        print("Merging indices:")
     else:
         print("Cancelling merging operation")
         return
