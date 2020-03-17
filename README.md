@@ -1,6 +1,6 @@
 # ir-utils
 ## Installation
-`pip install  git+https://github.com/steventhan/ir-utils.git`
+`pip install  git+https://github.com/steventhan/ir-utils.git -U`
 ## Examples
 ```python
 from ir_utils import canonicalize, RELEVANT_KEYWORDS
