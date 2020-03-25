@@ -19,6 +19,8 @@ def _extract_doc_from_json(doc_id, source):
     _assert_attribute("wave", int, source)
     _assert_attribute("body", str, source)
     _assert_attribute("crawler", str, source)
+    _assert_attribute("raw_html", str, source)
+    _assert_attribute("headers", str, source)
     return {
         "_op_type": "update",
         "_id": doc_id,
@@ -28,20 +30,24 @@ def _extract_doc_from_json(doc_id, source):
             "wave": source["wave"],
             "outlinks": source["outlinks"],
             "inlinks": source["inlinks"],
-            "crawler": source["crawler"]
+            "crawler": source["crawler"],
+            "raw_html": source["raw_html"],
+            "headers": source["headers"]
         },
         "script": {
             "lang": "painless",
             "source": """
                 List inlinks = params.inlinks;
                 List outlinks = params.outlinks;
+                Set sourceInlinks = new HashSet(ctx._source.inlinks);
+                Set sourceOutlinks = new HashSet(ctx._source.outlinks);
                 for (int i = 0; i < inlinks.size(); i++) {
-                    if (!ctx._source.inlinks.contains(inlinks[i])) {
+                    if (!sourceInlinks.contains(inlinks[i])) {
                         ctx._source.inlinks.add(inlinks[i]);
                     }
                 }
                 for (int i = 0; i < outlinks.size(); i++) {
-                    if (!ctx._source.outlinks.contains(outlinks[i])) {
+                    if (!sourceOutlinks.contains(outlinks[i])) {
                         ctx._source.outlinks.add(outlinks[i]);
                     }
                 }
@@ -63,16 +69,16 @@ def _get_all_local_docs(local_endpoint, local_index, doc_transform_func):
     }
     processed = 0
     for json in scan(local, index=local_index, query=es_query, request_timeout=50000):
-        if processed % 1000 == 0:
-            print(f"\t{processed} docs moved")
         yield _extract_doc_from_json(json["_id"], doc_transform_func(json["_source"]))
         processed += 1
-    print(f"\t{processed} docs moved")
+        if processed % 1000 == 0:
+            print(f"\t{processed} docs processed")
+    print(f"\t{processed} docs processed")
 
 
 def merge(local_endpoint: str, local_index: str, 
-    remote_endpoint: str=AWS_ENDPOINT, remote_index: str="", 
-    kibana_endpoint: str=AWS_KIBANA, doc_transform_func=lambda x: x):
+    remote_endpoint: str = AWS_ENDPOINT, remote_index: str = "", 
+    kibana_endpoint: str = AWS_KIBANA, doc_transform_func=lambda x: x):
     if not remote_index:
         remote_index = local_index
     print(f"Local endpoint: {local_endpoint}")
@@ -104,7 +110,8 @@ if __name__ == "__main__":
             "wave": doc["wave"],
             "outlinks": doc["outlinks"],
             "inlinks": doc["inlinks"],
-            "crawler": doc["crawler"]
+            "crawler": doc["crawler"],
+            "raw_html": "",
+            "headers": ""
         }
-    merge("http://localhost:9200", "crawler", remote_index="crawler1", 
-        doc_transform_func=transform)
+    merge("http://localhost:9200", "crawler", doc_transform_func=transform)
