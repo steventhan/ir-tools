@@ -12,7 +12,7 @@ print(RELENVANT_KEYWORDS)
 
 ## Merging local and remote indices
 ```python
-from ir_utils import merge 
+from ir_utils import merge_es 
 
 
 def transform(doc: dict):
@@ -25,6 +25,26 @@ def transform(doc: dict):
         "crawler": doc["crawler"]
     }
 
-merge("http://localhost:9200", "crawler", remote_index="crawler1", 
+merge_es("http://localhost:9200", "crawler", remote_index="crawler1", 
     doc_transform_func=transform)
+```
+
+## Non-es merge
+```python
+from ir_utils import merge_non_es
+
+lst = [
+    {
+        "_id": "example.com/abc.html",
+        "body": "the page body",
+        "url": "https://example.com/abc.html",
+        "wave": -1,
+        "outlinks": [...],
+        "inlinks": [...],
+        "crawler": "cralwer name"
+    },
+    ...
+]
+
+merge_non_es(lst)
 ```
