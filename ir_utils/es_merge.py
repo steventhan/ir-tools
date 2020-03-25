@@ -1,5 +1,6 @@
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import scan, bulk
+from typing import Dict, List
 import certifi
 
 
@@ -13,6 +14,7 @@ def _assert_attribute(attr_name, attr_type, source):
 
 
 def _extract_doc_from_json(doc_id, source):
+    assert doc_id and type(doc_id, str), "Missing '_id' (type: str)"
     _assert_attribute("inlinks", list, source)
     _assert_attribute("outlinks", list, source)
     _assert_attribute("url", str, source)
@@ -76,28 +78,47 @@ def _get_all_local_docs(local_endpoint, local_index, doc_transform_func):
     print(f"\t{processed} docs processed")
 
 
-def merge(local_endpoint: str, local_index: str, 
-    remote_endpoint: str = AWS_ENDPOINT, remote_index: str = "", 
-    kibana_endpoint: str = AWS_KIBANA, doc_transform_func=lambda x: x):
-    if not remote_index:
-        remote_index = local_index
-    print(f"Local endpoint: {local_endpoint}")
-    print(f"Local index: {local_index}")
+def _merge(remote_endpoint, remote_index, docs):
+    remote = Elasticsearch(hosts=[remote_endpoint], use_ssl=True,
+        ca_certs=certifi.where())
+    bulk(remote, docs, index=remote_index, max_chunk_bytes=10485760,
+        request_timeout=50000)
+
+def _confirm_input(remote_endpoint, remote_index) -> bool:
     print(f"Remote endpoint: {remote_endpoint}")
     print(f"Remote index: {remote_index}")
     confirm = input("Verify info before proceed, this is a non-reversible " 
         "operation\nDoes this look correct? y/n? ")
     if confirm == "y":
         print("Merging indices:")
-    else:
-        print("Cancelling merging operation")
+        return True
+    print("Cancelling merging operation")
+    return False
+
+
+def merge_non_es(docs: List[Dict],
+    remote_endpoint: str = AWS_ENDPOINT, remote_index: str = "", 
+    kibana_endpoint: str = AWS_KIBANA, doc_transform_func=lambda x: x):
+    if not _confirm_input(remote_endpoint, remote_index):
         return
-    remote = Elasticsearch(hosts=[remote_endpoint], use_ssl=True,
-        ca_certs=certifi.where())
+    docs = [_extract_doc_from_json(doc["_id"], doc) for doc in docs]
+    _merge(remote_endpoint, remote_index, docs)
+    print("Done")
+    print(f"Check for your data at {kibana_endpoint}")
+
+
+def merge_es(local_endpoint: str, local_index: str, 
+    remote_endpoint: str = AWS_ENDPOINT, remote_index: str = "", 
+    kibana_endpoint: str = AWS_KIBANA, doc_transform_func=lambda x: x):
+    if not remote_index:
+        remote_index = local_index
+    print(f"Local endpoint: {local_endpoint}")
+    print(f"Local index: {local_index}")
+    if not _confirm_input(remote_endpoint, remote_index):
+        return
     docs = _get_all_local_docs(local_endpoint, local_index, 
         doc_transform_func)
-    bulk(remote, docs, index=remote_index, max_chunk_bytes=10485760,
-        request_timeout=50000)
+    _merge(remote_endpoint, remote_index, docs)
     print("Done")
     print(f"Check for your data at {kibana_endpoint}")
     
@@ -114,4 +135,4 @@ if __name__ == "__main__":
             "raw_html": "",
             "headers": ""
         }
-    merge("http://localhost:9200", "crawler", doc_transform_func=transform)
+    merge_es("http://localhost:9200", "crawler", doc_transform_func=transform)
