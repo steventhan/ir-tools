@@ -5,6 +5,7 @@ import certifi
 
 
 AWS_ENDPOINT = "https://search-ir6200-xjtfl6maa3zicwvxmmygis5dry.us-east-1.es.amazonaws.com" 
+AWS_INDEX = "crawler"
 AWS_KIBANA = "https://search-ir6200-xjtfl6maa3zicwvxmmygis5dry.us-east-1.es.amazonaws.com/_plugin/kibana/app/kibana#/dev_tools/console?_g=()"
 
 
@@ -14,15 +15,13 @@ def _assert_attribute(attr_name, attr_type, source):
 
 
 def _extract_doc_from_json(doc_id, source):
-    assert doc_id and type(doc_id, str), "Missing '_id' (type: str)"
+    assert doc_id and type(doc_id) is str, "Missing '_id' (type: str)"
     _assert_attribute("inlinks", list, source)
     _assert_attribute("outlinks", list, source)
     _assert_attribute("url", str, source)
     _assert_attribute("wave", int, source)
     _assert_attribute("body", str, source)
     _assert_attribute("crawler", str, source)
-    _assert_attribute("raw_html", str, source)
-    _assert_attribute("headers", str, source)
     return {
         "_op_type": "update",
         "_id": doc_id,
@@ -33,8 +32,8 @@ def _extract_doc_from_json(doc_id, source):
             "outlinks": source["outlinks"],
             "inlinks": source["inlinks"],
             "crawler": source["crawler"],
-            "raw_html": source["raw_html"],
-            "headers": source["headers"]
+            "raw_html": source.get("raw_html", ""),
+            "headers": source.get("headers", "")
         },
         "script": {
             "lang": "painless",
@@ -97,8 +96,8 @@ def _confirm_input(remote_endpoint, remote_index) -> bool:
 
 
 def merge_non_es(docs: List[Dict],
-    remote_endpoint: str = AWS_ENDPOINT, remote_index: str = "", 
-    kibana_endpoint: str = AWS_KIBANA, doc_transform_func=lambda x: x):
+    remote_endpoint: str = AWS_ENDPOINT, remote_index: str = AWS_INDEX, 
+    kibana_endpoint: str = AWS_KIBANA):
     if not _confirm_input(remote_endpoint, remote_index):
         return
     docs = [_extract_doc_from_json(doc["_id"], doc) for doc in docs]
@@ -124,15 +123,17 @@ def merge_es(local_endpoint: str, local_index: str,
     
 
 if __name__ == "__main__":
-    def transform(doc: dict):
-        return {
-            "body": doc["body"],
-            "url": doc["url"],
-            "wave": doc["wave"],
-            "outlinks": doc["outlinks"],
-            "inlinks": doc["inlinks"],
-            "crawler": doc["crawler"],
-            "raw_html": "",
-            "headers": ""
+
+    lst = [
+        {
+            "_id": "example.com/abc.html",
+            "body": "the page body",
+            "url": "https://example.com/abc.html",
+            "wave": -1,
+            "outlinks": [],
+            "inlinks": [],
+            "crawler": "cralwer name"
         }
-    merge_es("http://localhost:9200", "crawler", doc_transform_func=transform)
+    ]
+
+    merge_non_es(lst)
