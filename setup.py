@@ -6,7 +6,7 @@ setuptools.setup(
     install_requires=[
         "url-normalize==1.4.1",
         "elasticsearch==7.5.1",
-        "certifi==2019.11.28"
+        "certifi==2022.12.7"
     ],
     author="Steven Than",
     description="Utils for ir homework",
